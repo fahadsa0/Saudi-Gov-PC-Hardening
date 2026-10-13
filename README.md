@@ -18,4 +18,4 @@ A modular suite of PowerShell scripts designed to apply security baselines, opti
 1. Open **PowerShell** as **Administrator**.
 2. Clone this repository:
    ```powershell
-   git clone [https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git](https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git)
+   git clone https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git
