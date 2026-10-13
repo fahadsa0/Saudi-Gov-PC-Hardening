@@ -1,21 +1,21 @@
-# 🛡️ Windows Endpoint Security Hardening & Maintenance Baseline
+# 🛡️ Windows Endpoint Security Hardening & Performance Baseline
 
-An automated PowerShell script template designed to enforce system hardening, disable vulnerable legacy protocols, and execute safe maintenance routines for Windows endpoints according to cybersecurity best practices.
-
----
-
-## 🔑 Key Features
-* 🔒 **Disable SMBv1 Protocol:** Mitigates risks associated with legacy network protocol vulnerabilities and ransomware threats.
-* 🛡️ **Firewall Policy Enforcement:** Guarantees that Windows Firewall is active across Domain, Private, and Public profiles.
-* 🌐 **DNS Cache Flush:** Clears cached DNS entries to safeguard against DNS spoofing and redirection attacks.
-* 🧹 **Secure Maintenance:** Removes unnecessary temporary files and cached system logs safely.
-* 📜 **Script Security Controls:** Enforces `RemoteSigned` execution policies to control untrusted script execution.
+A modular suite of PowerShell scripts designed to apply security baselines, optimize endpoint performance, enforce network security, and automate system maintenance for Windows systems according to cybersecurity best practices.
 
 ---
 
-## 🚀 How to Run the Script
+## 🛠️ Included Modules & Scripts
+
+* 🔒 **`Hardening-Script.ps1`**: Main security baseline module. Disables SMBv1, enforces firewall profiles, and sets execution policies.
+* ⚡ **`Optimize-Performance.ps1`**: Enables Ultimate Performance power plan, cleans memory standby allocations, and disables telemetry services.
+* 🩺 **`Integrity-Check.ps1`**: Automated system maintenance tool running DISM health restoration and SFC file verification.
+* 🌐 **`Hardening-Firewall.ps1`**: Network hardening script disabling NetBIOS over TCP/IP, LLMNR multicast, and blocking vulnerable ports.
+
+---
+
+## 🚀 How to Run the Scripts
 
 1. Open **PowerShell** as **Administrator**.
 2. Clone this repository:
    ```powershell
-git clone https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git
+   git clone [https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git](https://github.com/fahadsa0/Saudi-Gov-PC-Hardening.git)
