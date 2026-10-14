@@ -20,7 +20,7 @@ Write-Host "=========================================" -ForegroundColor Cyan
 # 2. Activate Ultimate Performance Power Scheme
 Write-Host "`n[1/4] Activating Ultimate Performance Power Scheme..." -ForegroundColor Yellow
 powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 | Out-Null
-$ultimatePlan = Get-CimInstance -Namespace root\cimv2\power -ClassName Win32_PowerPlan \vert{} Where-Object {$_.ElementName -match "Ultimate Performance"}
+$ultimatePlan = Get-CimInstance -Namespace root\cimv2\power -ClassName Win32_PowerPlan | Where-Object {$_.ElementName -match "Ultimate Performance"}
 if ($ultimatePlan) {
     Set-CimInstance -InputObject $ultimatePlan -Property @{ IsActive = $true }
 }
