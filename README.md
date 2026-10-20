@@ -10,7 +10,6 @@ A comprehensive, modular suite of PowerShell scripts designed to apply security 
 * 👤 **`Hardening-Accounts.ps1`**: Enforces account security policy, disables the built-in Guest account, mandates NLA for Remote Desktop, and protects LSASS memory credentials.
 * 💾 **`Hardening-Storage.ps1`**: Secures removable drives by disabling AutoRun/AutoPlay, enabling USB device audit logging, and verifying BitLocker encryption status.
 * 🌐 **`Hardening-Firewall.ps1`**: Network hardening module disabling legacy NetBIOS over TCP/IP and LLMNR protocols, while blocking vulnerable inbound ports.
-* ⚡ **`Optimize-Performance.ps1`**: System optimization script activating the Ultimate Performance power plan, clearing memory standby lists, and disabling background telemetry.
 * 🩺 **`Integrity-Check.ps1`**: Automated maintenance utility running DISM component store health restoration and SFC system file verification.
 
 ---
