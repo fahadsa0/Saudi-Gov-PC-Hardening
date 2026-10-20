@@ -37,7 +37,7 @@ Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyConti
 
 # 6. Apply Execution Policy Standard
 Write-Host "`n[5/5] Setting Script Execution Policy to RemoteSigned..." -ForegroundColor Yellow
-Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force -ErrorAction SilentlyContinue
 
 Write-Host "`n=========================================" -ForegroundColor Green
 Write-Host " Security Baseline Applied Successfully! " -ForegroundColor Green
