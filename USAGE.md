@@ -26,7 +26,9 @@ How to download, verify, run, and roll back the hardening scripts. العربي�
 4. Right-click the Start button, choose **Terminal (Admin)** or **Windows PowerShell (Admin)**.
 5. Go to the folder and compute the hashes (this does not execute anything):
    ```powershell
- 
+ ```powershell
+cd "$env:USERPROFILE\Downloads\Saudi-Gov-PC-Hardening-main\Saudi-Gov-PC-Hardening-main"
+```
    ```
 6. Compare each hash with the release notes. **If any hash differs, stop and do not run the scripts.**
 7. Only after the hashes match, unblock the files:
