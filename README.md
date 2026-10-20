@@ -4,6 +4,8 @@ A modular suite of PowerShell scripts that applies a security baseline to Window
 
 > **Read before using.** These scripts change security settings. Test on a non-production machine/VM first, review every change against your organization's policy, and keep a recovery plan. No script can guarantee a system is "100% secure"; this is a baseline, not a certification. It has **not** been audited against any specific standard (e.g. NCA ECC, CIS, Microsoft Security Baseline); map the settings to your required controls before claiming compliance.
 
+📘 **Full usage guide:** [English](USAGE.md) | [العربية](USAGE.ar.md)
+
 ---
 
 ## 🛠️ Modules
@@ -25,15 +27,15 @@ A modular suite of PowerShell scripts that applies a security baseline to Window
 1. Download the latest release ZIP from the **Releases** page (do not run scripts piped from the internet). Copy the SHA-256 hashes published in the **release notes**.
 2. Open **PowerShell as Administrator** in the extracted folder.
 3. Verify the files **without executing anything**, and compare with the hashes in the release notes (case-insensitive). A `SHA256SUMS.txt` inside the same ZIP only detects accidental corruption, so always compare against the separately published copy:
-   ```powershell
+```powershell
    Get-FileHash .\*.ps1 -Algorithm SHA256 | Select-Object Hash, @{n='File';e={Split-Path $_.Path -Leaf}}
-   ```
+```
 4. Unblock the files only after verification:
-   ```powershell
+```powershell
    Get-ChildItem .\*.ps1 | Unblock-File
-   ```
+```
 5. Preview, then apply (test on a VM first):
-   ```powershell
+```powershell
    .\Hardening-Script.ps1   -WhatIf
    .\Hardening-Accounts.ps1 -WhatIf
    .\Hardening-Storage.ps1  -WhatIf
@@ -43,7 +45,7 @@ A modular suite of PowerShell scripts that applies a security baseline to Window
    .\Hardening-Accounts.ps1
    .\Hardening-Storage.ps1
    .\Hardening-Firewall.ps1
-   ```
+```
 6. Reboot (needed for LSA protection and SMBv1/PowerShell v2 feature removal).
 
 Later re-checks on a machine you already trust can use `.\Integrity-Check.ps1 -VerifyScripts` (it compares against `SHA256SUMS.txt`, created with `-CreateManifest`).
