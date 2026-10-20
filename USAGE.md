@@ -1,150 +1,106 @@
-# 📘 Usage Guide
+# 🛡️ Windows Endpoint Security Hardening Baseline
 
-How to download, verify, run, and roll back the hardening scripts. العربية: [USAGE.ar.md](USAGE.ar.md)
+A modular suite of PowerShell scripts that applies a security baseline to Windows endpoints: protocol hardening, access control, removable-media protection, auditing, and integrity verification. Every script supports `-WhatIf`, logs what it does, records the previous state, and can be rolled back.
 
-> ⚠️ These scripts change Windows security settings. **Test on a virtual machine first.** Never run them on a production or work device without approval from your IT/security team.
+> **Read before using.** These scripts change security settings. Test on a non-production machine/VM first, review every change against your organization's policy, and keep a recovery plan. No script can guarantee a system is "100% secure"; this is a baseline, not a certification. It has **not** been audited against any specific standard (e.g. NCA ECC, CIS, Microsoft Security Baseline); map the settings to your required controls before claiming compliance.
+
+📘 **Full usage guide:** [English](USAGE.md) | [العربية](USAGE.ar.md)
 
 ---
 
-## 1. Requirements
+## 🛠️ Modules
 
-| Requirement | Details |
+| File | Purpose |
 |---|---|
-| OS | Windows 10 / 11 (Pro, Enterprise or Education recommended) |
-| PowerShell | **Windows PowerShell 5.1** (built in; open "Windows PowerShell"). PowerShell 7 is not tested. |
-| Rights | Local **Administrator** |
-| Files | All `.ps1` files must stay **in the same folder** (the scripts load `Common.ps1`) |
-| Home edition | Works, but BitLocker reporting will be unavailable |
+| `Common.ps1` | Shared helpers (logging, per-step error handling, rollback data). Dot-sourced, not run directly. |
+| `Hardening-Script.ps1` | Core baseline: disables SMBv1, firewall profiles (block inbound, log drops), PowerShell script-block logging, disables PowerShell v2, execution policy, optional SMB signing and cleanup. |
+| `Hardening-Accounts.ps1` | Disables built-in Guest (by SID), local password/lockout policy, RDP NLA + TLS, inactivity lock, LSA protection (RunAsPPL), disables WDigest. |
+| `Hardening-Storage.ps1` | Disables AutoRun/AutoPlay, enables removable-device audit logging, reports BitLocker status of all volumes, optional removable-media write/read blocking. |
+| `Hardening-Firewall.ps1` | Disables NetBIOS over TCP/IP, LLMNR, mDNS and insecure SMB guest logons; idempotent inbound block rules for legacy cleartext ports. |
+| `Integrity-Check.ps1` | DISM scan, repair only when needed, then SFC; plus `-CreateManifest` / `-VerifyScripts` to detect tampering of these scripts. |
+| `Restore-Hardening.ps1` | Rolls back recorded changes. |
 
 ---
 
-## 2. Get and verify the files
+## 🚀 How to Run
 
-1. Open the **Releases** page of this repository and download the latest ZIP.
-2. Copy the SHA-256 hashes written in the **release notes**.
-3. Extract the ZIP to a folder, e.g. `C:\Hardening`.
-4. Right-click the Start button, choose **Terminal (Admin)** or **Windows PowerShell (Admin)**.
-5. Go to the folder and compute the hashes (this does not execute anything):
- ```powershell
-cd "$env:USERPROFILE\Downloads\Saudi-Gov-PC-Hardening-main\Saudi-Gov-PC-Hardening-main"
+1. Download the latest release ZIP from the **Releases** page (do not run scripts piped from the internet). Copy the SHA-256 hashes published in the **release notes**.
+2. Open **PowerShell as Administrator** in the extracted folder.
+3. Verify the files **without executing anything**, and compare with the hashes in the release notes (case-insensitive). A `SHA256SUMS.txt` inside the same ZIP only detects accidental corruption, so always compare against the separately published copy:
+```powershell
+   cd "$env:USERPROFILE\Downloads\Saudi-Gov-PC-Hardening-main\Saudi-Gov-PC-Hardening-main"
 ```
-   ```
-6. Compare each hash with the release notes. **If any hash differs, stop and do not run the scripts.**
-7. Only after the hashes match, unblock the files:
-   ```powershell
+4. Unblock the files only after verification:
+```powershell
    Get-ChildItem .\*.ps1 | Unblock-File
-   ```
+```
+5. Preview, then apply (test on a VM first):
+```powershell
+   .\Hardening-Script.ps1   -WhatIf
+   .\Hardening-Accounts.ps1 -WhatIf
+   .\Hardening-Storage.ps1  -WhatIf
+   .\Hardening-Firewall.ps1 -WhatIf
 
-> Why unblock? Files downloaded from the internet are marked as untrusted by Windows. The `RemoteSigned` policy refuses to run them until you unblock them.
+   .\Hardening-Script.ps1
+   .\Hardening-Accounts.ps1
+   .\Hardening-Storage.ps1
+   .\Hardening-Firewall.ps1
+```
+6. Reboot (needed for LSA protection and SMBv1/PowerShell v2 feature removal).
+
+Later re-checks on a machine you already trust can use `.\Integrity-Check.ps1 -VerifyScripts` (it compares against `SHA256SUMS.txt`, created with `-CreateManifest`).
+
+> Independent project: not affiliated with or certified by any government body.
 
 ---
 
-## 3. What each script does
+### Useful options
 
-| Script | Changes made | Optional switches |
+| Script | Option | Effect |
 |---|---|---|
-| `Hardening-Script.ps1` | Disables SMBv1, enables firewall (blocks inbound, logs drops), PowerShell script-block logging, disables PowerShell v2, sets execution policy | `-ExecutionPolicy AllSigned`, `-RequireSmbSigning`, `-Cleanup` |
-| `Hardening-Accounts.ps1` | Disables Guest, password/lockout policy, RDP NLA + TLS, inactivity lock, LSA protection, disables WDigest | `-LockoutThreshold`, `-LockoutMinutes`, `-MinPasswordLength`, `-InactivitySeconds`, `-SkipPasswordPolicy`, `-SkipLsaProtection`, `-AcceptUefiLock` |
-| `Hardening-Storage.ps1` | Disables AutoRun/AutoPlay, enables USB/removable-media auditing, reports BitLocker status | `-BlockUnencryptedRemovableWrite`, `-BlockAllRemovableStorage` |
-| `Hardening-Firewall.ps1` | Disables NetBIOS, LLMNR, mDNS, insecure SMB guest logons; blocks legacy inbound ports (23, 512-514 TCP, 69 UDP) | `-ExtraTcpPorts`, `-ExtraUdpPorts` |
-| `Integrity-Check.ps1` | DISM scan/repair (only if needed) then SFC | `-Source`, `-SkipSfc`, `-CreateManifest`, `-VerifyScripts` |
-| `Restore-Hardening.ps1` | Rolls back recorded changes | `-List`, `-BackupFile`, `-WhatIf` |
+| Core | `-ExecutionPolicy AllSigned` | Stricter policy (never weakens an existing stricter one) |
+| Core | `-RequireSmbSigning` | Require SMB signing (can break old NAS/printers) |
+| Core | `-Cleanup` | Flush DNS + delete temp files older than 7 days (skips junctions) |
+| Accounts | `-LockoutThreshold`, `-LockoutMinutes`, `-MinPasswordLength`, `-InactivitySeconds` | Tune policy values |
+| Accounts | `-SkipPasswordPolicy`, `-SkipLsaProtection` | Opt out of a section |
+| Accounts | `-AcceptUefiLock` | Allow RunAsPPL=1 on pre-Windows 11 22H2 (UEFI lock, hard to undo) |
+| Storage | `-BlockUnencryptedRemovableWrite` | Deny writes to non-BitLocker removable drives |
+| Storage | `-BlockAllRemovableStorage` | Deny all removable disk access |
+| Firewall | `-ExtraTcpPorts`, `-ExtraUdpPorts` | Additional inbound ports to block |
 
 ---
 
-## 4. Run the scripts
+## 📋 Logs, Backups, Rollback
 
-### Step 1: Preview (changes nothing)
-```powershell
-.\Hardening-Script.ps1   -WhatIf
-.\Hardening-Accounts.ps1 -WhatIf
-.\Hardening-Storage.ps1  -WhatIf
-.\Hardening-Firewall.ps1 -WhatIf
-```
-Read the output. It lists what *would* change.
-
-### Step 2: Apply
-```powershell
-.\Hardening-Script.ps1
-.\Hardening-Accounts.ps1
-.\Hardening-Storage.ps1
-.\Hardening-Firewall.ps1
-```
-You can run only the scripts you need; they are independent.
-
-### Step 3: Reboot
-Required for LSA protection and for the SMBv1 / PowerShell v2 removal to take full effect.
-
-### Examples with options
-```powershell
-.\Hardening-Script.ps1 -ExecutionPolicy AllSigned -RequireSmbSigning
-.\Hardening-Accounts.ps1 -LockoutThreshold 3 -MinPasswordLength 12
-.\Hardening-Storage.ps1 -BlockUnencryptedRemovableWrite
-.\Hardening-Firewall.ps1 -ExtraTcpPorts 5900
-```
-
----
-
-## 5. Reading the output
-
-| Level | Meaning |
-|---|---|
-| `[OK]` (green) | A change was applied successfully |
-| `[INFO]` (cyan) | Information, or a setting was already correct |
-| `[WARN]` (yellow) | Needs your attention (reboot, compatibility, BitLocker off, etc.) |
-| `[ERROR]` (red) | A step failed; other steps still ran |
-
-At the end each script prints a summary: steps run, failed, warnings. The exit code is `0` if no step failed, `1` otherwise.
-
-**Logs:** `C:\ProgramData\EndpointHardening\Logs`  
-**Rollback data:** `C:\ProgramData\EndpointHardening\Backup` (SYSTEM and Administrators only)
-
----
-
-## 6. Roll back
+* Logs: `%ProgramData%\EndpointHardening\Logs`
+* Rollback data: `%ProgramData%\EndpointHardening\Backup` (folder restricted to SYSTEM + Administrators)
+* Exit code is `0` on success and `1` if any step failed. A failed step never prints "success".
 
 ```powershell
 .\Restore-Hardening.ps1 -List
-.\Restore-Hardening.ps1 -BackupFile "C:\ProgramData\EndpointHardening\Backup\<file>.json" -WhatIf
-.\Restore-Hardening.ps1 -BackupFile "C:\ProgramData\EndpointHardening\Backup\<file>.json"
-```
-Restore each backup file you want to undo, then reboot.
-
-**Not restored automatically** (turning them back on lowers security): SMBv1, PowerShell v2, the Guest account, local password policy (previous values are written in the Accounts log), and LSA protection applied with a UEFI lock.
-
----
-
-## 7. Integrity checks
-
-```powershell
-.\Integrity-Check.ps1                     # DISM + SFC system repair (can take a long time)
-.\Integrity-Check.ps1 -Source "WIM:D:\sources\install.wim:1"   # offline repair source
-.\Integrity-Check.ps1 -CreateManifest     # write SHA256SUMS.txt for the scripts
-.\Integrity-Check.ps1 -VerifyScripts      # compare scripts with SHA256SUMS.txt
+.\Restore-Hardening.ps1 -BackupFile "$env:ProgramData\EndpointHardening\Backup\<file>.json" -WhatIf
 ```
 
----
-
-## 8. Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `running scripts is disabled on this system` or "not digitally signed" | Verify the hashes, then run `Get-ChildItem .\*.ps1 \| Unblock-File`. Check policy with `Get-ExecutionPolicy -List`. |
-| `Common.ps1` cannot be found | Keep all scripts in the same folder and run them from that folder. |
-| `Administrator privileges are required` | Reopen PowerShell with **Run as administrator**. |
-| Warning that Group Policy overrides settings | The device is managed by a domain/Intune; ask your administrator to apply the settings centrally. |
-| A step shows `[ERROR]` | Read the message and the log file; the other steps are unaffected. Open an Issue and attach the log (remove device/user names first). |
-| Locked out by account lockout | Wait for the lockout duration, use a second admin account, or run Restore. |
-| An app or shared printer stopped working after NetBIOS/SMB/firewall changes | Run `Restore-Hardening.ps1` for that backup, then re-apply without the affecting script. |
+Not auto-restored by design (re-enabling lowers security): SMBv1, PowerShell v2, Guest account, local password policy (old values are in the log), LSA protection with a UEFI lock.
 
 ---
 
-## 9. Recommended workflow for organizations
+## ⚠️ Compatibility notes
 
-1. Test everything on a VM snapshot.
-2. Review each setting against your security policy.
-3. Pilot on a few devices for a week.
-4. Roll out gradually, keeping logs.
-5. For managed fleets, convert the settings to Group Policy / Intune instead of running scripts by hand.
+* **Domain / Intune-managed devices:** Group Policy/MDM overrides local settings. The scripts warn when they detect this.
+* **LSA protection:** can break incompatible security agents or credential providers. Pilot first.
+* **Account lockout:** also applies to the local Administrator over the network; keep a second admin account.
+* **NetBIOS/LLMNR/SMB changes:** may affect legacy file shares, printers and name resolution.
+* **BitLocker:** the script only reports. Enabling it must include recovery-key escrow.
 
-This is an independent project. It is not affiliated with or certified by any government body, and it has not been audited against a specific standard.
+## ✅ Suggested test checklist
+
+1. Run with `-WhatIf` and read the output.
+2. Apply on a VM snapshot; confirm login, RDP (if used), file shares, VPN, AV/EDR.
+3. Reboot and re-check.
+4. Run `Restore-Hardening.ps1` and confirm settings return.
+5. Pilot on a few real machines before wide rollout.
+
+## 📄 License
+
+MIT. See `LICENSE`.
