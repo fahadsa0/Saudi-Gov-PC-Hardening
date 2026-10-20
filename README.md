@@ -1,22 +1,19 @@
-# 🛡️ Windows Endpoint Security Hardening & Performance Baseline
+## 🚀 How to Run
 
-A comprehensive, modular suite of PowerShell scripts designed to apply security baselines, enforce access control, protect removable media, optimize endpoint performance, and automate system maintenance for Windows endpoints according to cybersecurity best practices.
+1. Download the latest release ZIP from the **Releases** page (do not run scripts piped from the internet).
+2. Open **PowerShell as Administrator** in the extracted folder.
+3. Verify integrity against the published `SHA256SUMS.txt`:
+```powershell
+   .\Integrity-Check.ps1 -VerifyScripts
+```
+4. Unblock the files only after verification:
+```powershell
+   Get-ChildItem .\*.ps1 | Unblock-File
+```
+5. Preview, then apply (test on a VM first):
+```powershell
+   .\Hardening-Script.ps1 -WhatIf
+   .\Hardening-Script.ps1
+```
 
-## 🛠️ Included Modules & Scripts
-
-* 🔒 **Hardening-Script.ps1** : Core security baseline module. Disables SMBv1, enforces firewall profiles across all networks, and manages script execution policies.
-* 👤 **Hardening-Accounts.ps1** : Enforces account security policy, disables the built-in Guest account, mandates NLA for Remote Desktop, and protects LSASS memory credentials.
-* 💾 **Hardening-Storage.ps1** : Secures removable drives by disabling AutoRun/AutoPlay, enabling USB device audit logging, and verifying BitLocker encryption status.
-* 🌐 **Hardening-Firewall.ps1** : Network hardening module disabling legacy NetBIOS over TCP/IP and LLMNR protocols, while blocking vulnerable inbound ports.
-* 🩺 **Integrity-Check.ps1** : Automated maintenance utility running DISM component store health restoration and SFC system file verification.
-
----
-
-## 🚀 How to Run the Scripts
-
-You can execute any module directly from **PowerShell** without needing to download or clone the repository.
-
-1. Open **PowerShell** as **Administrator**.
-2. Enable script execution for the current session:
-   ```powershell
-   Set-ExecutionPolicy Unrestricted -Scope Process -Force
+> Independent project: not affiliated with or certified by any government body.
