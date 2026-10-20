@@ -28,8 +28,7 @@
 4. اضغط يمين على زر ابدأ واختر **Terminal (Admin)** أو **Windows PowerShell (Admin)**.
 5. ادخل المجلد واحسب الهاش (هذا الأمر لا ينفّذ أي سكربت):
    ```powershell
-   cd C:\Hardening
-   Get-FileHash .\*.ps1 -Algorithm SHA256 | Select-Object Hash, @{n='File';e={Split-Path $_.Path -Leaf}}
+   cd "$env:USERPROFILE\Downloads\Saudi-Gov-PC-Hardening-main\Saudi-Gov-PC-Hardening-main"
    ```
 6. قارن كل هاش بالمكتوب في وصف الإصدار. **إذا اختلف أي هاش، لا تشغّل السكربتات.**
 7. بعد التطابق فقط، فك الحظر عن الملفات:
